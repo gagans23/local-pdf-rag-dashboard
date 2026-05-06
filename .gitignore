@@ -1,0 +1,12 @@
+.DS_Store
+.env
+.venv/
+__pycache__/
+*.py[cod]
+
+# Local runtime artifacts
+chroma_db/
+eval_log.csv
+
+# Streamlit local settings
+.streamlit/secrets.toml
