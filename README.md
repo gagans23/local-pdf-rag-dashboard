@@ -4,6 +4,12 @@ A local-first Streamlit application for asking questions over PDFs with retrieva
 
 The project turns uploaded PDFs into a searchable knowledge base, retrieves relevant chunks with embeddings, and answers through an Ollama-hosted local model. It is designed as a practical AI systems lab: private inference, transparent retrieval, citations, and lightweight evaluation in one browser app.
 
+![Knowledge dashboard](assets/knowledge-dashboard.png)
+
+## Why I Built This
+
+Most AI demos stop at a prompt box. This project explores the larger system around the model: document ingestion, vector memory, retrieval, local inference, citations, and evaluation. The goal is to make the assistant inspectable enough that a user can see what knowledge is indexed, which pages influence answers, and how retrieval quality changes over time.
+
 ## Features
 
 - Multi-PDF upload and indexing
@@ -18,16 +24,26 @@ The project turns uploaded PDFs into a searchable knowledge base, retrieves rele
 
 ## Architecture
 
-```text
-PDF uploads
-  -> text extraction with pypdf
-  -> chunking
-  -> embeddings with SentenceTransformers
-  -> vector storage in ChromaDB
-  -> semantic retrieval
-  -> grounded answer generation with Ollama
-  -> dashboard + evaluation tracking in Streamlit
+```mermaid
+flowchart TD
+    A["PDF uploads"] --> B["Text extraction with pypdf"]
+    B --> C["Chunking"]
+    C --> D["Embeddings with SentenceTransformers"]
+    D --> E["ChromaDB vector store"]
+    F["User question"] --> G["Query embedding"]
+    G --> H["Semantic retrieval"]
+    E --> H
+    H --> I["Context + citations"]
+    I --> J["Ollama local LLM"]
+    J --> K["Grounded answer"]
+    H --> L["Retrieval eval log"]
+    E --> M["Knowledge dashboard"]
+    L --> M
 ```
+
+## Example Use Case
+
+Upload an investor deck, policy document, technical manual, or research PDF. The app indexes the document into semantic chunks, lets you ask grounded questions, and shows the operational picture behind the answers: coverage, page density, retrieval evidence, and evaluation health.
 
 ## Tech Stack
 
@@ -94,9 +110,16 @@ This project demonstrates the core building blocks of a local enterprise AI assi
 - Evaluation logging
 - Visual operational dashboarding
 
+## What This Shows
+
+- How a PDF becomes a searchable vector knowledge base
+- How local models can answer without sending documents to a hosted API
+- How citations and retrieval scores improve trust
+- How dashboarding makes an AI workflow easier to operate
+- How internal evals can be introduced early instead of bolted on later
+
 ## Roadmap
 
-- Add screenshot assets to the README
 - Add automated retrieval evaluation tests
 - Add exportable evaluation reports
 - Add user-managed collections

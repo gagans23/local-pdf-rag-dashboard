@@ -1,5 +1,6 @@
 from pathlib import Path
 from datetime import datetime
+import csv
 import re
 from tempfile import NamedTemporaryFile
 
@@ -14,7 +15,7 @@ from pypdf import PdfReader
 from sentence_transformers import SentenceTransformer
 
 
-APP_TITLE = "Local PDF RAG Chat"
+APP_TITLE = "Local PDF RAG Intelligence Dashboard"
 CHROMA_PATH = "chroma_db"
 EVAL_LOG_PATH = Path("eval_log.csv")
 COLLECTION_NAME = "pdf_knowledge_base"
@@ -295,7 +296,25 @@ def evaluate_retrieval(question, source_rows):
 def get_eval_frame():
     if not EVAL_LOG_PATH.exists():
         return pd.DataFrame()
-    return pd.read_csv(EVAL_LOG_PATH)
+    eval_df = pd.read_csv(EVAL_LOG_PATH, escapechar="\\", on_bad_lines="skip")
+    if "embedding_model" in eval_df:
+        eval_df = eval_df[
+            eval_df["embedding_model"].astype(str).str.contains("/", regex=False, na=False)
+        ].copy()
+    numeric_columns = [
+        "confidence",
+        "best_distance",
+        "avg_distance",
+        "source_diversity",
+        "page_diversity",
+        "citation_count",
+    ]
+    for column in numeric_columns:
+        if column in eval_df:
+            eval_df[column] = pd.to_numeric(eval_df[column], errors="coerce")
+    if "confidence" in eval_df:
+        eval_df["confidence"] = eval_df["confidence"].fillna(0)
+    return eval_df
 
 
 def persist_eval(eval_row):
@@ -304,6 +323,8 @@ def persist_eval(eval_row):
         mode="a",
         header=not EVAL_LOG_PATH.exists(),
         index=False,
+        quoting=csv.QUOTE_MINIMAL,
+        escapechar="\\",
     )
 
 
